@@ -1,0 +1,63 @@
+# ShoesAZ - Git Ignore
+
+# PHP
+vendor/
+composer.lock
+
+# Configurações locais (dados sensíveis)
+config/database.local.php
+config/app.local.php
+.env
+.env.local
+
+# Uploads e arquivos gerados
+public/uploads/sapatos/*
+!public/uploads/sapatos/.gitkeep
+public/uploads/fotos/*
+!public/uploads/fotos/.gitkeep
+
+# Backups (manter apenas estrutura, não os arquivos)
+backups/*
+!backups/.gitkeep
+
+# Logs e debug
+debug*.php
+logs/
+*.log
+error_log
+
+# Cache
+*.cache
+.phpunit.result.cache
+
+# IDE e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node (se usar npm/yarn no futuro)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Windows
+*.exe
+*.dll
+*.bat
+
+# Arquivos de sessão (se houver)
+sessions/
+sess_*

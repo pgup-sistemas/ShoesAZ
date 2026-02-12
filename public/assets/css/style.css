@@ -1,0 +1,107 @@
+body { background: #f8f9fa; }
+.card { border-radius: 12px; }
+.btn-primary { background-color: #008bcd; border-color: #008bcd; }
+
+/* Sidebar Styles */
+.sidebar-container {
+  transition: all 0.3s ease;
+}
+
+/* Mobile Offcanvas Styles */
+.offcanvas .list-group-item {
+  border-left: none;
+  border-right: none;
+  border-radius: 0 !important;
+}
+
+/* Responsive Main Content */
+.main-content {
+  min-height: calc(100vh - 56px);
+  overflow-x: auto;
+}
+
+/* Table Responsiveness */
+.table-responsive {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: 0.75rem;
+  }
+
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .h5, h5 {
+    font-size: 1rem;
+  }
+
+  .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .p-3 {
+    padding: 0.75rem !important;
+  }
+
+  /* Navbar mobile fixes */
+  .navbar .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1rem;
+    margin-right: 0.5rem;
+  }
+
+  /* Footer mobile */
+  footer .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 576px) {
+  .navbar .btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .fs-2 {
+    font-size: 1.5rem !important;
+  }
+
+  .fs-3 {
+    font-size: 1.25rem !important;
+  }
+
+  .fs-4 {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .sidebar-container,
+  #sidebar-toggle,
+  #mobile-menu-toggle,
+  .navbar {
+    display: none !important;
+  }
+
+  .main-content {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}

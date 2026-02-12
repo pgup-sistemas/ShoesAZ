@@ -1,0 +1,8 @@
+{
+  "name": "shoesaz/shoesaz",
+  "type": "project",
+  "require": {
+    "php": ">=8.0",
+    "dompdf/dompdf": "^2.0"
+  }
+}

@@ -1,0 +1,12 @@
+.toast-container { pointer-events: none; }
+.toast { pointer-events: auto; }
+
+.toast {
+  max-width: 560px;
+}
+
+.toast .toast-body {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
