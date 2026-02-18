@@ -174,10 +174,10 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
   <?php endif; ?>
 
   <!-- MÉTRICAS PRINCIPAIS -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4 align-items-stretch">
     <!-- Coluna OS -->
-    <div class="col-12 col-lg-8">
-      <div class="card dashboard-card h-100">
+    <div class="col-12 col-lg-6 d-flex">
+      <div class="card dashboard-card flex-fill d-flex flex-column">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
           <h5 class="mb-0 fw-bold">📦 Ordens de Serviço</h5>
           <a href="<?= \App\Core\View::url('/os') ?>" class="btn btn-sm btn-outline-primary">Ver Todas</a>
@@ -234,7 +234,7 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
 
           <?php if (!empty($osHoje)): ?>
           <div>
-            <h6 class="text-primary fw-bold mb-2">� Entregas Hoje</h6>
+            <h6 class="text-primary fw-bold mb-2">📅 Entregas Hoje</h6>
             <div class="border rounded overflow-hidden">
               <?php foreach (array_slice($osHoje, 0, 3) as $os): ?>
               <div class="os-list-item d-flex justify-content-between align-items-center">
@@ -255,9 +255,9 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
     </div>
 
     <!-- Coluna Financeiro -->
-    <div class="col-12 col-lg-4 mt-4 mt-lg-0">
-      <div class="card dashboard-card mb-3">
-        <div class="card-header bg-white border-bottom py-3">
+    <div class="col-12 col-lg-3 d-flex flex-column gap-3 mt-4 mt-lg-0">
+      <div class="card dashboard-card flex-fill d-flex flex-column">
+        <div class="card-header bg-white border-bottom py-3;">
           <h5 class="mb-0 fw-bold">💵 Financeiro</h5>
         </div>
         <div class="card-body">
@@ -282,7 +282,7 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
         </div>
       </div>
 
-      <div class="card dashboard-card">
+      <div class="card dashboard-card flex-fill d-flex flex-column">
         <div class="card-header bg-white border-bottom py-3">
           <h5 class="mb-0 fw-bold">👥 Clientes</h5>
         </div>
@@ -325,10 +325,33 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
         </div>
       </div>
     </div>
+
+    <!-- Coluna Resumo Mensal -->
+    <div class="col-12 col-lg-3 d-flex flex-column mt-4 mt-lg-0">
+      <div class="card dashboard-card flex-fill d-flex flex-column">
+        <div class="card-header bg-white border-bottom py-3">
+          <h5 class="mb-0 fw-bold">📈 Resumo do Mês</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="text-muted small">Lucro</div>
+            <div class="fs-4 fw-bold text-success">R$ <?= number_format((float)($stats['lucro_mes'] ?? 0), 2, ',', '.') ?></div>
+          </div>
+          <div class="mb-3">
+            <div class="text-muted small">Despesas</div>
+            <div class="fs-5 fw-bold text-danger">R$ <?= number_format((float)($stats['despesas_mes'] ?? 0), 2, ',', '.') ?></div>
+          </div>
+          <div>
+            <div class="text-muted small">OS Finalizadas</div>
+            <div class="fs-5 fw-bold text-primary"><?= (int)($stats['os_finalizadas_mes'] ?? 0) ?></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ACESSO RÁPIDO -->
-  <div class="card dashboard-card">
+  <div class="card dashboard-card mt-4">
     <div class="card-body py-3">
       <div class="d-flex flex-wrap gap-2 justify-content-center">
         <a href="<?= \App\Core\View::url('/clientes') ?>" class="btn btn-outline-primary quick-action-btn btn-sm">
@@ -349,5 +372,6 @@ $receitasHoje = (float) ($stats['receitas_hoje'] ?? 0);
       </div>
     </div>
   </div>
+  <!-- Fim container-fluid -->
 </div>
 

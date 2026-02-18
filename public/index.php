@@ -21,6 +21,12 @@ use App\Controllers\UsuarioController;
 
 $router = new Router();
 
+// Evita 404s no console do navegador para /favicon.ico
+$router->get('/favicon.ico', function () {
+    http_response_code(204);
+    exit;
+});
+
 $router->get('/', function () {
     if (!\App\Core\Auth::check()) {
         \App\Core\Response::redirect('/login');

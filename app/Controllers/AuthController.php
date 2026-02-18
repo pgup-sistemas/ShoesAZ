@@ -212,19 +212,37 @@ final class AuthController
 
         $this->ensureRecuperacaoSenhaColumns();
 
-        $token = trim((string) Request::input('token', ''));
+        // Buscar token explicitamente de GET para evitar problemas de POST
+        $token = isset($_GET['token']) ? trim((string) $_GET['token']) : trim((string) Request::input('token', ''));
 
         if ($token === '') {
-            Flash::add('error', 'Token inválido.');
+            AuditoriaService::log(null, 'redefinicao_token_ausente', 'usuarios', null, null, [
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token de redefinição ausente. Solicite um novo link.');
             Response::redirect('/login');
         }
 
-        $stmt = DB::pdo()->prepare('SELECT id FROM usuarios WHERE token_recuperacao = :token AND token_expira_em > NOW() LIMIT 1');
+        $stmt = DB::pdo()->prepare('SELECT id, token_expira_em FROM usuarios WHERE token_recuperacao = :token LIMIT 1');
         $stmt->execute(['token' => $token]);
         $user = $stmt->fetch();
 
         if (!$user) {
-            Flash::add('error', 'Token inválido ou expirado.');
+            AuditoriaService::log(null, 'redefinicao_token_nao_encontrado', 'usuarios', null, null, [
+                'token' => $token,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token inválido. Solicite um novo link.');
+            Response::redirect('/login');
+        }
+
+        if (empty($user['token_expira_em']) || strtotime($user['token_expira_em']) < time()) {
+            AuditoriaService::log(null, 'redefinicao_token_expirado', 'usuarios', (int)$user['id'], null, [
+                'token' => $token,
+                'expira_em' => $user['token_expira_em'],
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token expirado. Solicite um novo link.');
             Response::redirect('/login');
         }
 
@@ -248,22 +266,44 @@ final class AuthController
         $senha = (string) Request::input('senha', '');
         $senhaConfirmacao = (string) Request::input('senha_confirmacao', '');
 
-        if ($token === '' || $senha === '' || strlen($senha) < 6) {
+        if ($token === '') {
+            AuditoriaService::log(null, 'redefinicao_token_ausente_post', 'usuarios', null, null, [
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token de redefinição ausente. Solicite um novo link.');
+            Response::redirect('/login');
+        }
+
+        if ($senha === '' || strlen($senha) < 6) {
             Flash::add('error', 'Senha deve ter pelo menos 6 caracteres.');
-            Response::redirect('/nova-senha?token=' . $token);
+            Response::redirect('/nova-senha?token=' . urlencode($token));
         }
 
         if ($senha !== $senhaConfirmacao) {
             Flash::add('error', 'Senhas não conferem.');
-            Response::redirect('/nova-senha?token=' . $token);
+            Response::redirect('/nova-senha?token=' . urlencode($token));
         }
 
-        $stmt = DB::pdo()->prepare('SELECT id FROM usuarios WHERE token_recuperacao = :token AND token_expira_em > NOW() LIMIT 1');
+        $stmt = DB::pdo()->prepare('SELECT id, token_expira_em FROM usuarios WHERE token_recuperacao = :token LIMIT 1');
         $stmt->execute(['token' => $token]);
         $user = $stmt->fetch();
 
         if (!$user) {
-            Flash::add('error', 'Token inválido ou expirado.');
+            AuditoriaService::log(null, 'redefinicao_token_nao_encontrado_post', 'usuarios', null, null, [
+                'token' => $token,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token inválido. Solicite um novo link.');
+            Response::redirect('/login');
+        }
+
+        if (empty($user['token_expira_em']) || strtotime($user['token_expira_em']) < time()) {
+            AuditoriaService::log(null, 'redefinicao_token_expirado_post', 'usuarios', (int)$user['id'], null, [
+                'token' => $token,
+                'expira_em' => $user['token_expira_em'],
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]);
+            Flash::add('error', 'Token expirado. Solicite um novo link.');
             Response::redirect('/login');
         }
 
