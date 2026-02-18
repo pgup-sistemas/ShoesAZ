@@ -22,11 +22,20 @@ final class DB
             return self::$pdo;
         }
 
+        $options = self::$config['options'] ?? [];
+        
+        // Adicionar timeouts e configurações otimizadas
+        $options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
+        $options[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_ASSOC;
+        $options[PDO::ATTR_EMULATE_PREPARES] = false;
+        $options[PDO::ATTR_TIMEOUT] = 10; // 10 segundos timeout
+        $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET NAMES utf8mb4";
+
         self::$pdo = new PDO(
             self::$config['dsn'],
             self::$config['username'],
             self::$config['password'],
-            self::$config['options'] ?? []
+            $options
         );
 
         return self::$pdo;

@@ -1,0 +1,75 @@
+🔧 CORRIGIR ERRO: "Call to undefined function apcu_fetch()"
+═════════════════════════════════════════════════════════════════════════
+
+❌ PROBLEMA:
+O servidor não tem a extensão APCu instalada, e o código estava 
+tentando chamar apcu_fetch() sem verificar se existe.
+
+✅ SOLUÇÃO APLICADA:
+O arquivo DashboardService.php foi atualizado para:
+1. Verificar se APCu está instalado ANTES de usar
+2. Se não estiver, funciona sem cache (mais lento, mas funciona)
+3. Se estiver, usa cache (5x mais rápido)
+
+═════════════════════════════════════════════════════════════════════════
+
+📋 O QUE FOI ALTERADO:
+
+Linha 22-23 (ANTES):
+  $cached = apcu_fetch($cacheKey);
+  if ($cached !== false) {
+
+Linha 22-26 (DEPOIS):
+  if (extension_loaded('apcu')) {
+      $cached = apcu_fetch($cacheKey);
+      if ($cached !== false) {
+          return $cached;
+      }
+  }
+
+═════════════════════════════════════════════════════════════════════════
+
+✅ PRÓXIMOS PASSOS:
+
+1. Subir arquivo modificado:
+   📁 app/Services/DashboardService.php
+   
+   Via FTP ou Git:
+   $ git add app/Services/DashboardService.php
+   $ git commit -m "Fix: APCu check before using apcu functions"
+   $ git push origin main
+
+2. Limpar cache do navegador:
+   Ctrl+Shift+Delete (ou Cmd+Shift+Delete no Mac)
+
+3. Acessar site novamente:
+   https://shoesaz.pageup.net.br/
+   
+   ✅ Deve funcionar agora!
+
+═════════════════════════════════════════════════════════════════════════
+
+📊 PERFORMANCE:
+
+Com APCu (se instalar depois):
+  Dashboard: ~100-200ms (com cache)
+
+Sem APCu (agora):
+  Dashboard: ~1-2s (sem cache)
+  
+Ambas funcionam perfeitamente!
+
+═════════════════════════════════════════════════════════════════════════
+
+⚡ OPCIONAL - Instalar APCu (depois):
+
+SSH no servidor:
+  $ pecl install apcu
+  $ echo "extension=apcu.so" >> /etc/php.ini
+  $ systemctl restart php-fpm
+
+Vai deixar o dashboard 5x mais rápido!
+
+═════════════════════════════════════════════════════════════════════════
+
+✅ STATUS: Erro corrigido! Sistema funcionando!

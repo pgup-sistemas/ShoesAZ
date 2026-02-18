@@ -1,0 +1,263 @@
+═══════════════════════════════════════════════════════════════════════════════
+                    📤 ARQUIVOS PARA FAZER DEPLOY
+═══════════════════════════════════════════════════════════════════════════════
+
+TOTAL: 13 arquivos (9 novos + 4 modificados)
+
+═══════════════════════════════════════════════════════════════════════════════
+🆕 ARQUIVOS NOVOS - Criar/Copiar no servidor
+═══════════════════════════════════════════════════════════════════════════════
+
+1. app/Core/Installer.php
+   └─ Classe para gerenciar estado de instalação
+   └─ Novo arquivo - copiar da máquina local
+
+2. app/Core/Middleware.php
+   └─ Middleware centralizado de autenticação
+   └─ Novo arquivo - copiar da máquina local
+
+3. app/Services/DashboardService.php
+   └─ Serviço com cache para dashboard
+   └─ Novo arquivo - copiar da máquina local
+
+4. tests/test_installer.php
+   └─ Script de teste do instalador
+   └─ Novo arquivo - copiar da máquina local (opcional)
+
+5. tests/route_test.php
+   └─ Script de teste das rotas
+   └─ Novo arquivo - copiar da máquina local (opcional)
+
+═══════════════════════════════════════════════════════════════════════════════
+✏️ ARQUIVOS MODIFICADOS - Sobrescrever no servidor
+═══════════════════════════════════════════════════════════════════════════════
+
+1. app/Core/Router.php
+   └─ Adicionado try-catch global e middleware
+   └─ Arquivo existente - SOBRESCREVER
+
+2. app/Core/DB.php
+   └─ Adicionado timeout e encoding
+   └─ Arquivo existente - SOBRESCREVER
+
+3. index.php
+   └─ Adicionado redirecionamento para instalador
+   └─ Arquivo existente - SOBRESCREVER
+
+4. install.php
+   └─ Interface profissional com campos de BD
+   └─ Arquivo existente - SOBRESCREVER (ou BACKUP antes!)
+
+═══════════════════════════════════════════════════════════════════════════════
+📋 INSTRUÇÕES DE DEPLOY
+═══════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: FAZER BACKUP
+  ⚠️ IMPORTANTE! Antes de subir qualquer arquivo:
+  
+  SSH no servidor:
+  $ cd /home/shoesaz/public_html/shoesaz
+  $ tar -czf backup_$(date +%Y%m%d_%H%M%S).tar.gz \
+      app/Core/Router.php \
+      app/Core/DB.php \
+      index.php \
+      install.php
+
+PASSO 2: REMOVER LOCK FILES (se forem reinstalar)
+  $ rm database/install.lock 2>/dev/null || true
+  $ rm .installed 2>/dev/null || true
+
+PASSO 3: SUBIR ARQUIVOS NOVOS (via FTP, rsync ou git)
+
+  Opção A - Via GIT (recomendado):
+  $ git add -A
+  $ git commit -m "Deploy: instalador com campos de BD"
+  $ git push origin main
+
+  Opção B - Via rsync:
+  rsync -avz --delete \
+    /c/xampp/htdocs/ShoesAZ/ \
+    user@shoesaz.pageup.net.br:/home/shoesaz/public_html/shoesaz/
+
+  Opção C - Via FTP/SFTP (manual - arquivo por arquivo)
+
+PASSO 4: SOBRESCREVER ARQUIVOS MODIFICADOS
+
+  Copiar/sobrescrever:
+  ✓ app/Core/Router.php
+  ✓ app/Core/DB.php
+  ✓ index.php
+  ✓ install.php
+
+  Criar novos:
+  ✓ app/Core/Installer.php
+  ✓ app/Core/Middleware.php
+  ✓ app/Services/DashboardService.php
+  ✓ tests/test_installer.php (opcional)
+  ✓ tests/route_test.php (opcional)
+
+PASSO 5: VERIFICAR PERMISSÕES
+  $ chmod 755 app/Core
+  $ chmod 755 app/Services
+  $ chmod 755 tests
+  $ chmod 644 app/Core/*.php
+  $ chmod 644 app/Services/*.php
+  $ chmod 644 tests/*.php
+
+PASSO 6: TESTAR NO NAVEGADOR
+
+  a) Acessar: https://shoesaz.pageup.net.br/
+     └─ Deve redirecionar para /install.php automaticamente
+  
+  b) Preencher formulário com:
+     - Host: localhost ou shoesaz.mysql.dbaas.com.br
+     - Porta: 3306
+     - Banco: shoesaz
+     - Usuário: [seu usuário MySQL]
+     - Senha: [sua senha MySQL]
+     - Admin: seu nome
+     - Login: seu login
+     - Senha: sua senha
+  
+  c) Clicar "Instalar Agora"
+  
+  d) Se sucesso: ✅ Mensagem verde "Instalação Concluída!"
+  
+  e) Ir para Dashboard e fazer login
+
+PASSO 7: MONITORAR ERROS
+  $ tail -f /home/shoesaz/logs/php_errors.log
+
+═══════════════════════════════════════════════════════════════════════════════
+📦 ESTRUTURA ESPERADA APÓS DEPLOY
+═══════════════════════════════════════════════════════════════════════════════
+
+shoesaz/
+├── app/
+│   ├── Core/
+│   │   ├── App.php (existente)
+│   │   ├── Auth.php (existente)
+│   │   ├── Authorization.php (existente)
+│   │   ├── Autoloader.php (existente)
+│   │   ├── Csrf.php (existente)
+│   │   ├── DB.php ✏️ MODIFICADO
+│   │   ├── Flash.php (existente)
+│   │   ├── Installer.php 🆕 NOVO
+│   │   ├── Middleware.php 🆕 NOVO
+│   │   ├── Pagination.php (existente)
+│   │   ├── Request.php (existente)
+│   │   ├── Response.php (existente)
+│   │   ├── Router.php ✏️ MODIFICADO
+│   │   └── View.php (existente)
+│   ├── Services/
+│   │   ├── AuditoriaService.php (existente)
+│   │   ├── DashboardService.php 🆕 NOVO
+│   │   ├── LinkPublicoService.php (existente)
+│   │   ├── LoginThrottleService.php (existente)
+│   │   ├── NumeracaoService.php (existente)
+│   │   └── UploadService.php (existente)
+│   └── Views/ (todos existentes)
+├── config/
+│   ├── app.php (existente)
+│   ├── database.php (será reescrito pelo instalador)
+│   └── database.local.php (existente)
+├── database/
+│   ├── install.lock 🆕 CRIADO (pelo instalador)
+│   ├── schema.sql (existente)
+│   └── seed.sql (existente)
+├── public/ (existente)
+├── tests/
+│   ├── healthcheck.php (existente)
+│   ├── http_smoke.php (existente)
+│   ├── route_test.php 🆕 NOVO (opcional)
+│   └── test_installer.php 🆕 NOVO (opcional)
+├── .installed 🆕 CRIADO (pelo instalador)
+├── index.php ✏️ MODIFICADO
+└── install.php ✏️ MODIFICADO
+
+═══════════════════════════════════════════════════════════════════════════════
+⚡ QUICK DEPLOY (resumido)
+═══════════════════════════════════════════════════════════════════════════════
+
+Se tiver acesso SSH:
+
+  $ ssh user@shoesaz.pageup.net.br
+  $ cd /home/shoesaz/public_html/shoesaz
+  $ tar -czf backup_$(date +%Y%m%d).tar.gz app/Core/Router.php app/Core/DB.php index.php install.php
+  $ git pull origin main
+  $ rm database/install.lock .installed 2>/dev/null || true
+
+Se tiver acesso via FTP/SFTP:
+  
+  Upload destes arquivos em ordem:
+  1. app/Core/Router.php (sobrescrever)
+  2. app/Core/DB.php (sobrescrever)
+  3. app/Core/Installer.php (novo)
+  4. app/Core/Middleware.php (novo)
+  5. app/Services/DashboardService.php (novo)
+  6. index.php (sobrescrever)
+  7. install.php (sobrescrever)
+  
+  Opcional:
+  - tests/test_installer.php (novo)
+  - tests/route_test.php (novo)
+
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TESTAR APÓS DEPLOY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Acessar página inicial:
+   https://shoesaz.pageup.net.br/
+   → Deve redirecionar para /install.php
+
+2. Executar teste (opcional):
+   https://shoesaz.pageup.net.br/tests/test_installer.php
+   → Deve mostrar status de todos componentes
+
+3. Executar testes de rota (opcional):
+   https://shoesaz.pageup.net.br/tests/route_test.php
+   → Deve confirmar que rotas estão funcionando
+
+═══════════════════════════════════════════════════════════════════════════════
+❌ PROBLEMAS COMUNS
+═══════════════════════════════════════════════════════════════════════════════
+
+"Erro: Cannot connect to database"
+  → Verificar credenciais MySQL (host, user, password, port)
+  → Verificar se usuário MySQL tem permissão de criar bancos
+
+"Erro: install.lock already exists"
+  → Remover files: database/install.lock e .installed
+  → Acessar /install.php novamente
+
+"Erro: Permission denied"
+  → Verificar permissões de arquivo (644)
+  → Verificar permissões de diretório (755)
+
+"Erro: Schema.sql not found"
+  → Verificar se database/schema.sql existe no servidor
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ CHECKLIST PRÉ-DEPLOY
+═══════════════════════════════════════════════════════════════════════════════
+
+□ Fazer backup dos arquivos existentes
+□ Verificar credenciais MySQL (host, port, user, password)
+□ Remover lock files (install.lock, .installed) se existirem
+□ Subir 9 arquivos novos
+□ Sobrescrever 4 arquivos modificados
+□ Verificar permissões (755 diretórios, 644 arquivos)
+□ Testar acesso via navegador
+□ Preencher formulário de instalação
+□ Verificar se banco foi criado
+□ Verificar se usuário admin foi criado
+□ Fazer login no sistema
+□ Monitorar error_log por 24 horas
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Data: 18/02/2026
+Versão: 1.0
+Status: Pronto para deploy
+
+═══════════════════════════════════════════════════════════════════════════════

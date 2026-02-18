@@ -4,6 +4,16 @@ declare(strict_types=1);
 
 require __DIR__ . '/app/bootstrap.php';
 
+// Verificar se sistema está instalado - se não, redirecionar para instalador
+$lockFile = __DIR__ . '/database/install.lock';
+$installedFlag = __DIR__ . '/.installed';
+
+if (!is_file($lockFile) && !is_file($installedFlag)) {
+    // Sistema não instalado - redirecionar para instalador
+    header('Location: /install.php', true, 302);
+    exit;
+}
+
 use App\Core\Router;
 use App\Controllers\AjudaController;
 use App\Controllers\AuthController;
@@ -21,6 +31,7 @@ use App\Controllers\ReciboController;
 use App\Controllers\RelatorioController;
 use App\Controllers\SapatoController;
 use App\Controllers\UsuarioController;
+use App\Services\DashboardService;
 
 $router = new Router();
 
@@ -29,112 +40,19 @@ $router->get('/', function () {
         \App\Core\Response::redirect('/login');
     }
 
-    // Estatísticas
-    $hoje = date('Y-m-d');
-    $db = \App\Core\DB::pdo();
+    // Usar DashboardService para obter dados otimizados
+    $user = \App\Core\Auth::user();
+    $userRole = (string) ($user['perfil'] ?? 'default');
 
-    // OS abertas (não entregues/canceladas)
-    $stmt = $db->query("SELECT COUNT(*) FROM ordens_servico WHERE status NOT IN ('Entregue', 'Cancelado')");
-    $osAbertas = (int) $stmt->fetchColumn();
-
-    // OS atrasadas
-    $stmt = $db->prepare("SELECT os.*, c.nome as cliente_nome 
-                         FROM ordens_servico os 
-                         JOIN clientes c ON os.cliente_id = c.id 
-                         WHERE os.prazo_entrega < :hoje 
-                         AND os.status NOT IN ('Entregue', 'Cancelado') 
-                         ORDER BY os.prazo_entrega ASC");
-    $stmt->execute(['hoje' => $hoje]);
-    $osAtrasadas = $stmt->fetchAll();
-
-    // Entregas para hoje
-    $stmt = $db->prepare("SELECT os.*, c.nome as cliente_nome 
-                         FROM ordens_servico os 
-                         JOIN clientes c ON os.cliente_id = c.id 
-                         WHERE os.prazo_entrega = :hoje 
-                         ORDER BY os.status ASC");
-    $stmt->execute(['hoje' => $hoje]);
-    $osHoje = $stmt->fetchAll();
-
-    // Total de clientes
-    $stmt = $db->query("SELECT COUNT(*) FROM clientes");
-    $clientes = (int) $stmt->fetchColumn();
-
-    // Receitas de hoje
-    $stmt = $db->prepare("SELECT COALESCE(SUM(valor), 0) FROM pagamentos 
-                         WHERE data_pagamento = :hoje AND status = 'Pago'");
-    $stmt->execute(['hoje' => $hoje]);
-    $receitasHoje = (float) $stmt->fetchColumn();
-
-    // Caixa de hoje (mesma lógica do CaixaController: preferir aberto, senão o mais recente)
-    $stmt = $db->prepare("SELECT * FROM caixa WHERE data = :hoje AND status = 'Aberto' ORDER BY id DESC LIMIT 1");
-    $stmt->execute(['hoje' => $hoje]);
-    $caixaHoje = $stmt->fetch();
-    
-    if (!$caixaHoje) {
-        $stmt = $db->prepare("SELECT * FROM caixa WHERE data = :hoje ORDER BY id DESC LIMIT 1");
-        $stmt->execute(['hoje' => $hoje]);
-        $caixaHoje = $stmt->fetch();
-    }
-
-    // OS para amanhã
-    $amanha = date('Y-m-d', strtotime('+1 day'));
-    $stmt = $db->prepare("SELECT os.*, c.nome as cliente_nome 
-                         FROM ordens_servico os 
-                         JOIN clientes c ON os.cliente_id = c.id 
-                         WHERE os.prazo_entrega = :amanha 
-                         AND os.status NOT IN ('Entregue', 'Cancelado') 
-                         ORDER BY os.status ASC");
-    $stmt->execute(['amanha' => $amanha]);
-    $osAmanha = $stmt->fetchAll();
-
-    // Orçamentos pendentes (aguardando aprovação)
-    $stmt = $db->query("SELECT COUNT(*) FROM orcamentos WHERE status = 'Aguardando'");
-    $orcamentosPendentes = (int) $stmt->fetchColumn();
-
-    // OS Em reparo
-    $stmt = $db->query("SELECT COUNT(*) FROM ordens_servico WHERE status = 'Em reparo'");
-    $osEmReparo = (int) $stmt->fetchColumn();
-
-    // OS Aguardando retirada
-    $stmt = $db->query("SELECT COUNT(*) FROM ordens_servico WHERE status = 'Aguardando retirada'");
-    $osAguardandoRetirada = (int) $stmt->fetchColumn();
-
-    // Contas a receber (pagamentos pendentes)
-    $stmt = $db->query("SELECT COUNT(DISTINCT os.cliente_id) as clientes,
-                         COALESCE(SUM(p.valor), 0) as total
-                         FROM pagamentos p
-                         JOIN ordens_servico os ON p.os_id = os.id
-                         WHERE p.status = 'Pendente'");
-    $contasReceber = $stmt->fetch();
-
-    // Inadimplentes (pendente com vencimento em atraso)
-    $stmt = $db->prepare("SELECT COUNT(DISTINCT os.cliente_id) as clientes,
-                         COALESCE(SUM(p.valor), 0) as total
-                         FROM pagamentos p
-                         JOIN ordens_servico os ON p.os_id = os.id
-                         WHERE p.status = 'Pendente'
-                         AND p.vencimento IS NOT NULL
-                         AND p.vencimento < :hoje");
-    $stmt->execute(['hoje' => $hoje]);
-    $inadimplencia = $stmt->fetch();
+    $stats = DashboardService::getStats($userRole);
+    $osAtrasadas = DashboardService::getOsAtrasadas(3);
+    $osHoje = DashboardService::getOsHoje(3);
+    $osAmanha = DashboardService::getOsAmanha(3);
+    $caixaHoje = DashboardService::getCaixaHoje();
 
     \App\Core\View::render('dashboard/index', [
         'pageTitle' => 'Dashboard',
-        'stats' => [
-            'os_abertas' => $osAbertas,
-            'os_atrasadas' => count($osAtrasadas),
-            'os_amanha' => count($osAmanha),
-            'orcamentos_pendentes' => $orcamentosPendentes,
-            'os_em_reparo' => $osEmReparo,
-            'os_aguardando_retirada' => $osAguardandoRetirada,
-            'clientes' => $clientes,
-            'receitas_hoje' => $receitasHoje,
-            'contas_receber_clientes' => (int) ($contasReceber['clientes'] ?? 0),
-            'contas_receber_total' => (float) ($contasReceber['total'] ?? 0),
-            'inadimplentes' => (int) ($inadimplencia['clientes'] ?? 0),
-            'valor_inadimplencia' => (float) ($inadimplencia['total'] ?? 0),
-        ],
+        'stats' => $stats,
         'osAtrasadas' => $osAtrasadas,
         'osHoje' => $osHoje,
         'osAmanha' => $osAmanha,
