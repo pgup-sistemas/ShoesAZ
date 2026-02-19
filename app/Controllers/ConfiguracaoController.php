@@ -19,6 +19,10 @@ final class ConfiguracaoController
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Configurações');
+
         $stmt = DB::pdo()->query('SELECT * FROM empresa LIMIT 1');
         $empresa = $stmt->fetch();
 

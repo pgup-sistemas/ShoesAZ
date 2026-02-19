@@ -303,6 +303,14 @@ $podeCompartilhar = $isEdit && !$isConvertido;
               $mensagemZap .= "Horário: Seg a Sex 08:00-18:00 | Sáb 08:00-12:00\n";
               $mensagemZap .= "\nSe tiver dúvidas, pode chamar por aqui.";
             ?>
+            <?php if ($publicUrl): ?>
+              <div class="mb-2">
+                <div class="input-group input-group-sm mb-2">
+                  <input class="form-control" id="link-orcamento" value="<?= htmlspecialchars($publicUrl, ENT_QUOTES, 'UTF-8') ?>" readonly>
+                  <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('link-orcamento').value); showToast('Link copiado!', 'success')">Copiar</button>
+                </div>
+              </div>
+            <?php endif; ?>
             <a class="btn btn-outline-success w-100 mb-2" target="_blank" href="https://wa.me/?text=<?= urlencode($mensagemZap) ?>">
               Enviar WhatsApp
             </a>

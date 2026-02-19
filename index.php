@@ -40,6 +40,9 @@ $router->get('/', function () {
         \App\Core\Response::redirect('/login');
     }
 
+    \App\Core\Breadcrumb::reset();
+    \App\Core\Breadcrumb::add('Dashboard');
+
     // Usar DashboardService para obter dados otimizados
     $user = \App\Core\Auth::user();
     $userRole = (string) ($user['perfil'] ?? 'default');

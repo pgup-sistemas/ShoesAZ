@@ -31,6 +31,7 @@ final class View
         }
 
         $flashes = Flash::pull();
+        $breadcrumbs = Breadcrumb::getItems();
 
         extract($data, EXTR_SKIP);
 

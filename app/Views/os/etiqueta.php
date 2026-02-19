@@ -4,8 +4,13 @@ $linkPublicoUrl = '';
 if (isset($os['id'])) {
     $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $basePath = '/ShoesAZ';
-    $linkPublicoUrl = $scheme . '://' . $host . $basePath . '/public?token=' . ($linkPublico['token'] ?? 'os-' . $os['id']);
+    $basePath = \App\Core\View::url('');
+    if ($linkPublico && is_array($linkPublico) && !empty($linkPublico['token'])) {
+        $linkPublicoUrl = $scheme . '://' . $host . $basePath . '/public?token=' . $linkPublico['token'];
+    } else {
+        // Fallback se o token não estiver disponível
+        $linkPublicoUrl = $scheme . '://' . $host . $basePath . '/public?token=os-' . $os['id'];
+    }
 }
 ?>
 <!doctype html>

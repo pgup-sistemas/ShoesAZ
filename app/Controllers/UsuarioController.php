@@ -21,6 +21,10 @@ final class UsuarioController
     {
         Authorization::requireRoles(['Administrador']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Usuários');
+
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
 
@@ -49,6 +53,11 @@ final class UsuarioController
     public function create(): void
     {
         Authorization::requireRoles(['Administrador']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Usuários', View::url('/usuarios'));
+        \App\Core\Breadcrumb::add('Novo Usuário');
 
         View::render('usuarios/form', [
             'pageTitle' => 'Novo Usuário',
@@ -111,6 +120,11 @@ final class UsuarioController
     public function edit(): void
     {
         Authorization::requireRoles(['Administrador']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Usuários', View::url('/usuarios'));
+        \App\Core\Breadcrumb::add('Editar');
 
         $id = (int) Request::input('id', 0);
 

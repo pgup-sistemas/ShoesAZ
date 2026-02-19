@@ -16,6 +16,10 @@ final class BuscaController
     {
         Authorization::requireLogin();
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Busca');
+
         $termo = trim((string) Request::input('q', ''));
         
         if ($termo === '') {

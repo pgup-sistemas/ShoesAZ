@@ -23,6 +23,10 @@ final class ReciboController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Recibos');
+
         $osId = (int) Request::input('os_id', 0);
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
@@ -74,6 +78,11 @@ final class ReciboController
     public function create(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Recibos', View::url('/recibos'));
+        \App\Core\Breadcrumb::add('Novo Recibo');
 
         $osId = (int) Request::input('os_id', 0);
 
@@ -202,6 +211,10 @@ final class ReciboController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Recibos', View::url('/recibos'));
+
         $id = (int) Request::input('id', 0);
 
         $stmt = DB::pdo()->prepare(
@@ -246,6 +259,11 @@ final class ReciboController
     public function imprimir(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Recibos', View::url('/recibos'));
+        \App\Core\Breadcrumb::add('Imprimir');
 
         $id = (int) Request::input('id', 0);
 

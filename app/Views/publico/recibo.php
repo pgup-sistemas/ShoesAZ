@@ -85,6 +85,9 @@
     <div class="mb-4">
       <h5 class="mb-3">Dados do Cliente</h5>
       <p class="mb-1"><strong>Nome:</strong> <?= htmlspecialchars((string) ($recibo['cliente_nome'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
+      <?php if (!empty($recibo['cliente_cpf'])): ?>
+        <p class="mb-1"><strong>CPF:</strong> <?= htmlspecialchars((string) $recibo['cliente_cpf'], ENT_QUOTES, 'UTF-8') ?></p>
+      <?php endif; ?>
       <?php if (!empty($recibo['cliente_telefone'])): ?>
         <p class="mb-0"><strong>Telefone:</strong> <?= htmlspecialchars((string) $recibo['cliente_telefone'], ENT_QUOTES, 'UTF-8') ?></p>
       <?php endif; ?>
@@ -94,23 +97,31 @@
       <div class="mb-4">
         <h5 class="mb-3">Serviços Realizados</h5>
         <div class="table-responsive">
-          <table class="table table-bordered">
+          <table class="table table-sm table-bordered">
             <thead>
               <tr>
-                <th>Sapato</th>
-                <th>Serviço</th>
-                <th>Valor</th>
+                <th>Qtd</th>
+                <th>Descrição</th>
+                <th class="text-end">Valor Unit.</th>
+                <th class="text-end">Total</th>
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($sapatos as $sapato): ?>
+              <?php foreach ($sapatos as $s): ?>
                 <tr>
-                  <td><?= htmlspecialchars((string) ($sapato['nome'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                  <td><?= htmlspecialchars((string) ($sapato['servico'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                  <td class="text-end">R$ <?= number_format((float) ($sapato['valor'] ?? 0), 2, ',', '.') ?></td>
+                  <td>1</td>
+                  <td><?= htmlspecialchars((string) $s['tipo_servico'] . ' - ' . $s['categoria'] . ($s['marca'] ? ' (' . $s['marca'] . ')' : ''), ENT_QUOTES, 'UTF-8') ?></td>
+                  <td class="text-end">R$ <?= number_format((float) $s['valor'], 2, ',', '.') ?></td>
+                  <td class="text-end">R$ <?= number_format((float) $s['valor'], 2, ',', '.') ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
+            <tfoot>
+              <tr class="table-active" style="font-weight: bold;">
+                <td colspan="3" class="text-end"><strong>VALOR TOTAL:</strong></td>
+                <td class="text-end"><strong>R$ <?= number_format((float) ($recibo['valor_total'] ?? 0), 2, ',', '.') ?></strong></td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -132,9 +143,9 @@
             <tbody>
               <?php foreach ($pagamentos as $pagamento): ?>
                 <tr>
-                  <td><?= htmlspecialchars((string) ($pagamento['parcela'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                  <td><?= htmlspecialchars((string) ($pagamento['parcela_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                   <td class="text-end">R$ <?= number_format((float) ($pagamento['valor'] ?? 0), 2, ',', '.') ?></td>
-                  <td><?= date('d/m/Y', strtotime((string) $pagamento['data_pagamento'])) ?></td>
+                  <td><?= $pagamento['data_pagamento'] ? date('d/m/Y', strtotime((string) $pagamento['data_pagamento'])) : '-' ?></td>
                   <td><?= htmlspecialchars((string) ($pagamento['forma_pagamento'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                 </tr>
               <?php endforeach; ?>
@@ -149,9 +160,23 @@
       </div>
     <?php endif; ?>
 
-    <div class="assinatura">
-      <p class="mb-1">Assinatura do Recebedor</p>
-      <p class="text-muted small mb-0">__________________________________________</p>
+    <div class="mb-4 p-3 bg-light rounded">
+      <h5 class="mb-3">Garantia e Termos</h5>
+      <p class="mb-1"><strong>Garantia:</strong> <?= (int) ($recibo['garantia_dias'] ?? 30) ?> dias</p>
+      <p class="mb-0"><strong>Termos:</strong> <?= nl2br(htmlspecialchars((string) ($recibo['termos'] ?? ''), ENT_QUOTES, 'UTF-8')) ?></p>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-6">
+        <div class="assinatura">
+          <p class="mb-0">Assinatura do Cliente</p>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="assinatura">
+          <p class="mb-0">Assinatura do Responsável</p>
+        </div>
+      </div>
     </div>
 
     <div class="text-center mt-4 text-muted small">

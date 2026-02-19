@@ -15,6 +15,10 @@ final class RelatorioController
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Relatórios');
+
         View::render('relatorios/index', [
             'pageTitle' => 'Relatórios',
         ]);
@@ -23,6 +27,11 @@ final class RelatorioController
     public function lucro(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Relatórios', View::url('/relatorios'));
+        \App\Core\Breadcrumb::add('Lucro/Prejuízo');
 
         $dataInicio = (string) Request::input('data_inicio', date('Y-m-01'));
         $dataFim = (string) Request::input('data_fim', date('Y-m-t'));
@@ -73,6 +82,11 @@ final class RelatorioController
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Relatórios', View::url('/relatorios'));
+        \App\Core\Breadcrumb::add('Ordens de Serviço');
+
         $dataInicio = (string) Request::input('data_inicio', date('Y-m-01'));
         $dataFim = (string) Request::input('data_fim', date('Y-m-t'));
 
@@ -112,6 +126,11 @@ final class RelatorioController
     public function clientes(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Relatórios', View::url('/relatorios'));
+        \App\Core\Breadcrumb::add('Clientes');
 
         $db = DB::pdo();
 

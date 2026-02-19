@@ -23,10 +23,25 @@ final class OrcamentoController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Orçamentos');
+
         $q = trim((string) Request::input('q', ''));
         $status = trim((string) Request::input('status', ''));
+        $sort = trim((string) Request::input('sort', 'created_at'));
+        $dir = strtoupper(trim((string) Request::input('dir', 'DESC')));
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
+
+        // Validar parâmetros de sort
+        $validSortFields = ['numero', 'cliente_nome', 'valor_final', 'status', 'validade', 'created_at'];
+        if (!in_array($sort, $validSortFields, true)) {
+            $sort = 'created_at';
+        }
+        if (!in_array($dir, ['ASC', 'DESC'], true)) {
+            $dir = 'DESC';
+        }
 
         // Build WHERE conditions
         $where = 'WHERE 1=1';
@@ -55,12 +70,24 @@ final class OrcamentoController
         $pagination = new Pagination($page, $perPage);
         $pagination->setTotal($total);
 
+        // Build ORDER BY clause with proper field names
+        $sortField = match($sort) {
+            'numero' => 'o.numero',
+            'cliente_nome' => 'c.nome',
+            'valor_final' => 'o.valor_final',
+            'status' => 'o.status',
+            'validade' => 'o.validade',
+            'created_at' => 'o.created_at',
+            default => 'o.created_at',
+        };
+        $orderBy = "{$sortField} {$dir}";
+
         // Fetch paginated results
         $sql = "SELECT o.*, c.nome as cliente_nome 
                 FROM orcamentos o 
                 JOIN clientes c ON o.cliente_id = c.id 
                 {$where}
-                ORDER BY o.created_at DESC 
+                ORDER BY {$orderBy}
                 LIMIT ? OFFSET ?";
         $stmt = DB::pdo()->prepare($sql);
         $execParams = array_merge($params, [$pagination->perPage, $pagination->offset]);
@@ -73,12 +100,19 @@ final class OrcamentoController
             'q' => $q,
             'status' => $status,
             'pagination' => $pagination,
+            'sort' => $sort,
+            'dir' => $dir,
         ]);
     }
 
     public function create(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Orçamentos', View::url('/orcamentos'));
+        \App\Core\Breadcrumb::add('Novo Orçamento');
 
         View::render('orcamentos/form', [
             'pageTitle' => 'Novo Orçamento',
@@ -149,6 +183,11 @@ final class OrcamentoController
     public function edit(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Orçamentos', View::url('/orcamentos'));
+        \App\Core\Breadcrumb::add('Editar');
 
         $id = (int) Request::input('id', 0);
         $stmt = DB::pdo()->prepare('SELECT * FROM orcamentos WHERE id = :id');
@@ -325,6 +364,11 @@ final class OrcamentoController
     public function imprimir(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Orçamentos', View::url('/orcamentos'));
+        \App\Core\Breadcrumb::add('Imprimir');
 
         $id = (int) Request::input('id', 0);
         $stmt = DB::pdo()->prepare(

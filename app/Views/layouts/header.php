@@ -31,7 +31,15 @@ $user = Auth::user();
         ☰
       </button>
     <?php endif; ?>
-    <a class="navbar-brand" href="<?= \App\Core\View::url('/') ?>">ShoesAZ</a>
+    <a class="navbar-brand" href="<?= \App\Core\View::url('/') ?>">
+      ShoesAZ
+      <small style="font-size: 0.65rem; opacity: 0.8;">
+        <?php 
+          $config = require __DIR__ . '/../../config.php';
+          echo 'v' . $config['app']['version'];
+        ?>
+      </small>
+    </a>
     
     <?php if ($user): ?>
       <form class="d-none d-md-flex mx-auto" style="max-width: 400px; width: 100%;" action="<?= \App\Core\View::url('/busca') ?>" method="get">
@@ -84,6 +92,10 @@ $user = Auth::user();
     <?php endif; ?>
 
       <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080"></div>
+      
+      <!-- Breadcrumb Navigation -->
+      <?= \App\Core\Breadcrumb::render() ?>
+
       <script>
         window.__FLASHES__ = <?= json_encode($flashes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
       </script>

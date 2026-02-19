@@ -6,8 +6,28 @@ $atrasados = $atrasados ?? 0;
 $ordens = $ordens ?? [];
 $isSapateiro = $isSapateiro ?? false;
 $pagination = $pagination ?? null;
+$sort = $sort ?? 'prazo';
+$dir = $dir ?? 'ASC';
 
 $hoje = date('Y-m-d');
+
+// Helper para renderizar headers clicáveis com indicador de sort
+function renderSortHeader($label, $field, $currentSort, $currentDir, $query) {
+    $params = ['q' => $query['q'], 'status' => $query['status']];
+    if ($query['atrasados'] ?? 0) $params['atrasados'] = 1;
+    
+    $newDir = ($currentSort === $field && $currentDir === 'ASC') ? 'DESC' : 'ASC';
+    $params['sort'] = $field;
+    $params['dir'] = $newDir;
+    
+    $url = \App\Core\View::url('/os') . '?' . http_build_query($params);
+    $icon = '';
+    if ($currentSort === $field) {
+        $icon = ' <i class="bi ' . ($currentDir === 'ASC' ? 'bi-sort-up' : 'bi-sort-down') . '"></i>';
+    }
+    
+    return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" class="text-decoration-none text-dark">' . $label . $icon . '</a>';
+}
 
 ?>
 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
@@ -53,14 +73,14 @@ $hoje = date('Y-m-d');
     <table class="table table-striped mb-0 align-middle">
       <thead>
         <tr>
-          <th>Número</th>
-          <th>Cliente</th>
-          <th>Prazo</th>
-          <th>Status</th>
+          <th><?= renderSortHeader('Número', 'numero', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
+          <th><?= renderSortHeader('Cliente', 'cliente_nome', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
+          <th><?= renderSortHeader('Prazo', 'prazo_entrega', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
+          <th><?= renderSortHeader('Status', 'status', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
           <?php if (!$isSapateiro): ?>
-            <th>Sapateiro</th>
+            <th><?= renderSortHeader('Sapateiro', 'sapateiro_nome', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
           <?php endif; ?>
-          <th>Valor</th>
+          <th><?= renderSortHeader('Valor', 'valor_total', $sort, $dir, ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?></th>
           <th></th>
         </tr>
       </thead>
@@ -130,6 +150,6 @@ $hoje = date('Y-m-d');
       Mostrando <?= $pagination->getRange()[0] ?> - <?= $pagination->getRange()[1] ?> de <?= $pagination->total ?> OS
     </small>
   </div>
-  <?= $pagination->render(\App\Core\View::url('/os'), ['q' => $q, 'status' => $status, 'atrasados' => $atrasados]) ?>
+  <?= $pagination->render(\App\Core\View::url('/os'), ['q' => $q, 'status' => $status, 'atrasados' => $atrasados, 'sort' => $sort, 'dir' => $dir]) ?>
 </div>
 <?php endif; ?>

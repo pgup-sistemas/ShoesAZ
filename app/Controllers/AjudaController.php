@@ -10,6 +10,10 @@ class AjudaController
     {
         Authorization::requireLogin();
         
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Ajuda');
+        
         $ajudaFile = dirname(__DIR__, 2) . '/GUIA_AJUDA.md';
         $conteudo = '';
         

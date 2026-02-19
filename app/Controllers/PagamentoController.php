@@ -21,6 +21,10 @@ final class PagamentoController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Contas a Receber');
+
         $q = trim((string) Request::input('q', ''));
         $apenasAtrasados = (string) Request::input('atrasados', '') === '1';
         $page = Pagination::getPageFromRequest();
@@ -93,6 +97,10 @@ final class PagamentoController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Pagamentos');
+
         $osId = (int) Request::input('os_id', 0);
         $status = trim((string) Request::input('status', ''));
         $page = Pagination::getPageFromRequest();
@@ -156,6 +164,11 @@ final class PagamentoController
     public function create(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Pagamentos', View::url('/pagamentos'));
+        \App\Core\Breadcrumb::add('Novo Pagamento');
 
         $osId = (int) Request::input('os_id', 0);
 

@@ -21,6 +21,10 @@ final class DespesaController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Despesas');
+
         $categoria = trim((string) Request::input('categoria', ''));
         $dataInicio = (string) Request::input('data_inicio', '');
         $dataFim = (string) Request::input('data_fim', '');
@@ -99,6 +103,11 @@ final class DespesaController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Despesas', View::url('/despesas'));
+        \App\Core\Breadcrumb::add('Nova Despesa');
+
         View::render('despesas/form', [
             'pageTitle' => 'Nova Despesa',
             'despesa' => [
@@ -176,6 +185,11 @@ final class DespesaController
     public function edit(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Despesas', View::url('/despesas'));
+        \App\Core\Breadcrumb::add('Editar');
 
         $id = (int) Request::input('id', 0);
         $stmt = DB::pdo()->prepare('SELECT * FROM despesas WHERE id = :id');

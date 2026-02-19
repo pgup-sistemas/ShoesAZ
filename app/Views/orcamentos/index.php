@@ -4,6 +4,25 @@ $q = $q ?? '';
 $status = $status ?? '';
 $orcamentos = $orcamentos ?? [];
 $pagination = $pagination ?? null;
+$sort = $sort ?? 'created_at';
+$dir = $dir ?? 'DESC';
+
+// Helper para renderizar headers clicáveis com indicador de sort
+function renderSortHeaderOrc($label, $field, $currentSort, $currentDir, $query) {
+    $params = ['q' => $query['q'], 'status' => $query['status']];
+    
+    $newDir = ($currentSort === $field && $currentDir === 'ASC') ? 'DESC' : 'ASC';
+    $params['sort'] = $field;
+    $params['dir'] = $newDir;
+    
+    $url = \App\Core\View::url('/orcamentos') . '?' . http_build_query($params);
+    $icon = '';
+    if ($currentSort === $field) {
+        $icon = ' <i class="bi ' . ($currentDir === 'ASC' ? 'bi-sort-up' : 'bi-sort-down') . '"></i>';
+    }
+    
+    return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" class="text-decoration-none text-dark">' . $label . $icon . '</a>';
+}
 
 ?>
 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
@@ -39,11 +58,11 @@ $pagination = $pagination ?? null;
     <table class="table table-striped mb-0 align-middle">
       <thead>
         <tr>
-          <th>Número</th>
-          <th>Cliente</th>
-          <th>Valor Final</th>
-          <th>Status</th>
-          <th>Validade</th>
+          <th><?= renderSortHeaderOrc('Número', 'numero', $sort, $dir, ['q' => $q, 'status' => $status]) ?></th>
+          <th><?= renderSortHeaderOrc('Cliente', 'cliente_nome', $sort, $dir, ['q' => $q, 'status' => $status]) ?></th>
+          <th><?= renderSortHeaderOrc('Valor Final', 'valor_final', $sort, $dir, ['q' => $q, 'status' => $status]) ?></th>
+          <th><?= renderSortHeaderOrc('Status', 'status', $sort, $dir, ['q' => $q, 'status' => $status]) ?></th>
+          <th><?= renderSortHeaderOrc('Validade', 'validade', $sort, $dir, ['q' => $q, 'status' => $status]) ?></th>
           <th></th>
         </tr>
       </thead>
@@ -106,6 +125,6 @@ $pagination = $pagination ?? null;
       Mostrando <?= $pagination->getRange()[0] ?> - <?= $pagination->getRange()[1] ?> de <?= $pagination->total ?> orçamentos
     </small>
   </div>
-  <?= $pagination->render(\App\Core\View::url('/orcamentos'), ['q' => $q, 'status' => $status]) ?>
+  <?= $pagination->render(\App\Core\View::url('/orcamentos'), ['q' => $q, 'status' => $status, 'sort' => $sort, 'dir' => $dir]) ?>
 </div>
 <?php endif; ?>

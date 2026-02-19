@@ -5,9 +5,17 @@
 <!-- Footer -->
 <footer class="bg-light border-top mt-auto py-2">
   <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <span class="text-muted small" style="font-size: 0.75rem;">
-        Pageup sistemas &copy; <?= date('Y') ?> - Todos os direitos reservados
+        <?php 
+          $config = require __DIR__ . '/../../config.php';
+          $yearStart = $config['app']['year_start'];
+          $yearCurrent = $config['app']['year_current'];
+          $yearRange = $yearStart === $yearCurrent ? $yearStart : "{$yearStart}–{$yearCurrent}";
+          $version = $config['app']['version'];
+          $company = $config['app']['company'];
+        ?>
+        <?= htmlspecialchars($company, ENT_QUOTES, 'UTF-8') ?> &copy; <?= $yearRange ?> - v<?= $version ?> - Todos os direitos reservados
       </span>
       <a href="https://wa.me/5569993882222" target="_blank" class="text-success" style="font-size: 1.25rem; text-decoration: none;" title="Contato WhatsApp">
         💬

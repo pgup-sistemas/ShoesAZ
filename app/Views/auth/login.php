@@ -102,6 +102,13 @@ use App\Core\Csrf;
               </a>
             </div>
           </div>
+          <div class="card-footer bg-light border-top py-2 text-center" style="font-size: 0.75rem;">
+            <?php 
+              $config = require __DIR__ . '/../../config.php';
+              $version = $config['app']['version'];
+            ?>
+            ShoesAZ v<?= $version ?>
+          </div>
         </div>
       </div>
     </div>

@@ -20,6 +20,10 @@ final class CaixaController
     {
         Authorization::requireRoles(['Administrador', 'Gerente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Caixa');
+
         $data = (string) Request::input('data', date('Y-m-d'));
 
         // Preferir o caixa ABERTO mais recente do dia; se não existir, mostrar o último caixa do dia

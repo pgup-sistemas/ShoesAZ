@@ -31,11 +31,26 @@ final class OSController
 
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Ordens de Serviço');
+
         $q = trim((string) Request::input('q', ''));
         $status = trim((string) Request::input('status', ''));
         $atrasados = (int) Request::input('atrasados', 0);
+        $sort = trim((string) Request::input('sort', 'prazo'));
+        $dir = strtoupper(trim((string) Request::input('dir', 'ASC')));
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
+
+        // Validar parâmetros de sort
+        $validSortFields = ['numero', 'cliente_nome', 'prazo_entrega', 'status', 'valor_total', 'created_at'];
+        if (!in_array($sort, $validSortFields, true)) {
+            $sort = 'prazo_entrega';
+        }
+        if (!in_array($dir, ['ASC', 'DESC'], true)) {
+            $dir = 'ASC';
+        }
 
         // Build base WHERE conditions
         $where = 'WHERE 1=1';
@@ -70,13 +85,28 @@ final class OSController
         $pagination = new Pagination($page, $perPage);
         $pagination->setTotal($total);
 
+        // Build ORDER BY clause with proper field names
+        $sortField = match($sort) {
+            'numero' => 'os.numero',
+            'cliente_nome' => 'c.nome',
+            'prazo_entrega', 'prazo' => 'os.prazo_entrega',
+            'status' => 'os.status',
+            'valor_total' => 'os.valor_total',
+            'created_at' => 'os.created_at',
+            default => 'os.prazo_entrega',
+        };
+        $orderBy = "{$sortField} {$dir}";
+        if ($sort !== 'created_at') {
+            $orderBy .= ', os.created_at DESC';
+        }
+
         // Fetch paginated results
         $sql = "SELECT os.*, c.nome as cliente_nome, u.nome as sapateiro_nome 
                 FROM ordens_servico os 
                 JOIN clientes c ON os.cliente_id = c.id 
                 LEFT JOIN usuarios u ON os.sapateiro_id = u.id 
                 {$where}
-                ORDER BY os.prazo_entrega ASC, os.created_at DESC 
+                ORDER BY {$orderBy}
                 LIMIT ? OFFSET ?";
         $stmt = DB::pdo()->prepare($sql);
         $execParams = array_merge($params, [$pagination->perPage, $pagination->offset]);
@@ -91,6 +121,8 @@ final class OSController
             'atrasados' => $atrasados,
             'isSapateiro' => false,
             'pagination' => $pagination,
+            'sort' => $sort,
+            'dir' => $dir,
         ]);
     }
 
@@ -99,10 +131,25 @@ final class OSController
         $user = Auth::user();
         $sapateiroId = (int) ($user['id'] ?? 0);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Minhas OS');
+
         $q = trim((string) Request::input('q', ''));
         $status = trim((string) Request::input('status', ''));
+        $sort = trim((string) Request::input('sort', 'prazo'));
+        $dir = strtoupper(trim((string) Request::input('dir', 'ASC')));
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
+
+        // Validar parâmetros de sort
+        $validSortFields = ['numero', 'cliente_nome', 'prazo_entrega', 'status', 'valor_total', 'created_at'];
+        if (!in_array($sort, $validSortFields, true)) {
+            $sort = 'prazo_entrega';
+        }
+        if (!in_array($dir, ['ASC', 'DESC'], true)) {
+            $dir = 'ASC';
+        }
 
         $where = 'WHERE os.sapateiro_id = ?';
         $params = [$sapateiroId];
@@ -129,12 +176,27 @@ final class OSController
         $pagination = new Pagination($page, $perPage);
         $pagination->setTotal($total);
 
+        // Build ORDER BY clause with proper field names
+        $sortField = match($sort) {
+            'numero' => 'os.numero',
+            'cliente_nome' => 'c.nome',
+            'prazo_entrega', 'prazo' => 'os.prazo_entrega',
+            'status' => 'os.status',
+            'valor_total' => 'os.valor_total',
+            'created_at' => 'os.created_at',
+            default => 'os.prazo_entrega',
+        };
+        $orderBy = "{$sortField} {$dir}";
+        if ($sort !== 'created_at') {
+            $orderBy .= ', os.created_at DESC';
+        }
+
         // Fetch paginated results
         $sql = "SELECT os.*, c.nome as cliente_nome 
                 FROM ordens_servico os 
                 JOIN clientes c ON os.cliente_id = c.id 
                 {$where}
-                ORDER BY os.prazo_entrega ASC 
+                ORDER BY {$orderBy}
                 LIMIT ? OFFSET ?";
         $stmt = DB::pdo()->prepare($sql);
         $execParams = array_merge($params, [$pagination->perPage, $pagination->offset]);
@@ -149,12 +211,19 @@ final class OSController
             'atrasados' => 0,
             'isSapateiro' => true,
             'pagination' => $pagination,
+            'sort' => $sort,
+            'dir' => $dir,
         ]);
     }
 
     public function edit(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente', 'Sapateiro']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Ordens de Serviço', View::url('/os'));
+        \App\Core\Breadcrumb::add('Editar');
 
         $id = (int) Request::input('id', 0);
         $user = Auth::user();
@@ -178,6 +247,11 @@ final class OSController
             Flash::add('error', 'Você não tem acesso a esta OS.');
             Response::redirect('/os');
         }
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add($perfil === 'Sapateiro' ? 'Minhas OS' : 'Ordens de Serviço', View::url('/os'));
+        \App\Core\Breadcrumb::add('OS ' . $os['numero']);
 
         $sapatos = $this->getSapatosDaOS($id);
         $sapateiros = $this->getSapateirosParaSelect();

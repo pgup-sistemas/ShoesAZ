@@ -111,7 +111,7 @@ final class PublicoController
     private function visualizarRecibo(int $id): void
     {
         $stmt = DB::pdo()->prepare(
-            'SELECT r.*, os.numero as os_numero, os.data_entrada, c.nome as cliente_nome, c.telefone as cliente_telefone
+            'SELECT r.*, os.numero as os_numero, os.data_entrada, c.nome as cliente_nome, c.cpf as cliente_cpf, c.telefone as cliente_telefone
              FROM recibos r 
              JOIN ordens_servico os ON r.os_id = os.id 
              JOIN clientes c ON os.cliente_id = c.id 
@@ -126,8 +126,8 @@ final class PublicoController
             return;
         }
 
-        $stmt = DB::pdo()->prepare('SELECT * FROM pagamentos WHERE recibo_id = :id AND status = :status ORDER BY parcela');
-        $stmt->execute(['recibo_id' => $id, 'status' => 'Pago']);
+        $stmt = DB::pdo()->prepare('SELECT * FROM pagamentos WHERE os_id = :os_id AND status = :status ORDER BY parcela_numero');
+        $stmt->execute(['os_id' => $recibo['os_id'], 'status' => 'Pago']);
         $pagamentos = $stmt->fetchAll();
 
         $stmt = DB::pdo()->prepare('SELECT * FROM sapatos WHERE os_id = :os_id ORDER BY id');

@@ -21,6 +21,10 @@ final class ClienteController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Clientes');
+
         $q = trim((string) Request::input('q', ''));
         $page = Pagination::getPageFromRequest();
         $perPage = 20;
@@ -90,6 +94,11 @@ final class ClienteController
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Clientes', View::url('/clientes'));
+        \App\Core\Breadcrumb::add('Novo Cliente');
+
         View::render('clientes/form', [
             'pageTitle' => 'Novo Cliente',
             'cliente' => [
@@ -137,6 +146,11 @@ final class ClienteController
     public function edit(): void
     {
         Authorization::requireRoles(['Administrador', 'Gerente', 'Atendente']);
+
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Clientes', View::url('/clientes'));
+        \App\Core\Breadcrumb::add('Editar');
 
         $id = (int) Request::input('id', 0);
         $stmt = DB::pdo()->prepare('SELECT * FROM clientes WHERE id = :id');

@@ -26,6 +26,10 @@ final class BackupController
     {
         Authorization::requireRoles(['Administrador']);
 
+        \App\Core\Breadcrumb::reset();
+        \App\Core\Breadcrumb::add('Dashboard', View::url('/'));
+        \App\Core\Breadcrumb::add('Backup');
+
         $backups = $this->listBackups();
 
         View::render('backup/index', [

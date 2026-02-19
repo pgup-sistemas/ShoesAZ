@@ -26,15 +26,17 @@ final class LinkPublicoService
     public static function criar(string $tipo, int $referenciaId, int $validadeDias = 30): array
     {
         $token = bin2hex(random_bytes(32));
+        $dataCriacao = date('Y-m-d H:i:s');
         $expiracao = date('Y-m-d H:i:s', strtotime("+{$validadeDias} days"));
 
         $stmt = DB::pdo()->prepare(
-            'INSERT INTO links_publicos (token, tipo, referencia_id, data_expiracao) VALUES (:token, :tipo, :ref_id, :expiracao)'
+            'INSERT INTO links_publicos (token, tipo, referencia_id, data_criacao, data_expiracao) VALUES (:token, :tipo, :ref_id, :data_criacao, :expiracao)'
         );
         $stmt->execute([
             'token' => $token,
             'tipo' => $tipo,
             'ref_id' => $referenciaId,
+            'data_criacao' => $dataCriacao,
             'expiracao' => $expiracao,
         ]);
 
@@ -45,7 +47,10 @@ final class LinkPublicoService
             'token' => $token,
             'tipo' => $tipo,
             'referencia_id' => $referenciaId,
+            'data_criacao' => $dataCriacao,
             'data_expiracao' => $expiracao,
+            'acessos' => 0,
+            'ultimo_acesso' => null,
         ];
     }
 
